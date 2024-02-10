@@ -3,6 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <title>Simple P2P example</title>
+    <!-- Yjs scripts
+    <script src="https://cdn.jsdelivr.net/npm/yjs@latest/dist/yjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/y-websocket@latest/dist/y-websocket.min.js"></script> -->
+
+    <!-- Monaco Editor scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
+    <script>
+      require.config({
+        paths: {
+          vs: "https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs",
+        },
+      });
+    </script>
   </head>
 
   <body>
@@ -16,6 +29,9 @@
     <button id="screenShareButton" onclick="shareScreen();" disabled>
       Share Screen
     </button>
+    <button id="stopScreenShareButton" onclick="stopShareScreen();" disabled>
+      Stop Share Screen
+    </button>
     <br />
     <input type="text" id="chatMessage" placeholder="Enter message" />
     <button id="sendMessageButton" onclick="sendMessage();">Send</button>
@@ -28,9 +44,9 @@
 
     <h3>Remote Video</h3>
     <video id="remoteVideo" width="640" height="480" autoplay></video>
-
-    <h3>Stream</h3>
-    <video id="screenStream" width="640" height="480" autoplay></video>
+    <h3>Editor</h3>
+    <div id="editor-container" style="height: 500px; width: 500px"></div>
+    <button id="sendEditorDataButton" onclick="sendEditorData();">Send</button>
 
     <script src="./main.js"></script>
   </body>

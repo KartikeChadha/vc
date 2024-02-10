@@ -4,6 +4,7 @@ const screenStream = document.getElementById("screenStream");
 const callButton = document.getElementById("callButton");
 const hangupButton = document.getElementById("hangupButton");
 const screenShareButton = document.getElementById("screenShareButton");
+const stopScreenShareButton = document.getElementById("stopScreenShareButton");
 const socket = new WebSocket("wss://localhost:8888", "echo-protocol");
 
 let peerConnection;
@@ -11,7 +12,40 @@ let dataChannel;
 let emojiChannel;
 let localMediaStream;
 let remoteId;
+
+let flag = false;
 const remoteMediaStream = new MediaStream(); // stream from the remote peer
+
+//monaco editor
+require(["vs/editor/editor.main"], function () {
+  const editor = monaco.editor.create(
+    document.getElementById("editor-container"),
+    {
+      value: 'console.log("Hello, Monaco Editor!");',
+      language: "javascript",
+      theme: "vs-dark", // Set the theme to VS Code Dark
+    }
+  );
+
+  // Expose the Monaco Editor instance to the global scope
+  window.monacoEditor = editor;
+  const monacoEditor = window.monacoEditor;
+
+  if (window.monacoEditor) {
+    // const monacoEditor = window.monacoEditor;
+
+    monacoEditor.getModel().onDidChangeContent(() => {
+      const content = monacoEditor.getValue();
+      if (!flag) {
+        sendEditorData(content);
+      }
+      // console.log(content);
+    });
+  }
+
+  // Now, you can access 'window.monacoEditor' from other scripts
+});
+//monaco editor -end
 
 socket.onopen = () => {
   console.log("socket::open");
@@ -126,6 +160,7 @@ const stop = () => {
   localVideo.srcObject = undefined;
   remoteVideo.srcObject = undefined;
   screenStream.srcObject = undefined;
+  stopScreenShareButton.disabled = true;
 };
 
 const getLocalMediaStream = async () => {
@@ -224,6 +259,15 @@ const initializeDataChannelListeners = () => {
     console.log("dataChannel data", data);
   };
 };
+
+const updateMonacoEditor = (data) => {
+  console.log("hehe");
+  flag = true;
+  window.monacoEditor.setValue(data);
+
+  flag = false;
+};
+
 //new emojiDataChannel
 const initializeEmojiChannelListeners = () => {
   emojiChannel.onopen = () => console.log("emojiChannel opened");
@@ -231,14 +275,15 @@ const initializeEmojiChannelListeners = () => {
   emojiChannel.onerror = (error) => console.error("emojiChannel error:", error);
 
   emojiChannel.onmessage = ({ data }) => {
-    console.log("emojiChannel data", data);
+    updateMonacoEditor(data);
+    // console.log("emojiChannel data", data);
   };
 };
 
 const shareScreen = async () => {
   const mediaStream = await getLocalScreenCaptureStream();
 
-  const screenTrack = mediaStream.getVideoTrackshello()[0];
+  const screenTrack = mediaStream.getVideoTracks()[0];
   //having stream separate to the video calls
   if (screenTrack) {
     console.log("replace camera track with screen track");
@@ -248,7 +293,22 @@ const shareScreen = async () => {
     // screenStream.srcObject = screenTrack;
   }
 };
-hello;
+const stopShareScreen = async () => {
+  // const mediaStream = await getLocalScreenCaptureStream();
+
+  // const screenTrack = mediaStream.getVideoTracks()[0];
+  //having stream separate to the video calls
+  stopScreenShareButton.disabled = true;
+  localMediaStream = await getLocalMediaStream();
+  localTrack = localMediaStream.getVideoTracks()[0];
+  if (localTrack) {
+    console.log("replace camera track with screen track");
+    replaceTrack(localTrack);
+    // addTrack(screenTrack);
+
+    // screenStream.srcObject = screenTrack;
+  }
+};
 
 const getLocalScreenCaptureStream = async () => {
   try {
@@ -267,13 +327,16 @@ const replaceTrack = (newTrack) => {
   const sender = peerConnection
     .getSenders()
     .find((sender) => sender.track.kind === newTrack.kind);
+  // console.log(peerConnection.getSenders());
+  console.log(sender.track.kind, newTrack.kind);
 
   if (!sender) {
     console.warn("failed to find sender");
 
     return;
   }
-
+  console.log("replaced");
+  stopScreenShareButton.disabled = false;
   sender.replaceTrack(newTrack);
 };
 
@@ -319,27 +382,39 @@ const sendMessage = () => {
 };
 
 //Adding a new dataChannel
-const sendEmoji = () => {
-  const message = document.getElementById("emojiMessage").value;
+// const sendEmoji = () => {
+//   const message = document.getElementById("emojiMessage").value;
 
-  if (!message) {
-    alert("no message entered");
+//   if (!message) {
+//     alert("no message entered");
 
-    return;
-  }
+//     return;
+//   }
 
-  if (!emojiChannel || emojiChannel.readyState !== "open") {
-    alert("data channel is undefined or is not connected");
+//   if (!emojiChannel || emojiChannel.readyState !== "open") {
+//     alert("data channel is undefined or is not connected");
 
-    return;
-  }
+//     return;
+//   }
 
-  console.log("sending emoji", message);
-  const data = {
-    message,
-    time: new Date(),
-  };
+//   console.log("sending emoji", message);
+//   const data = {
+//     message,
+//     time: new Date(),
+//   };
 
-  emojiChannel.send(JSON.stringify(data));
-  document.getElementById("emojiMessage").value = "";
+//   emojiChannel.send(JSON.stringify(data));
+//   document.getElementById("emojiMessage").value = "";
+// };
+
+const sendEditorData = (data) => {
+  // const data = window.monacoEditor.getValue();
+  emojiChannel.send(data);
 };
+
+// emojiChannel.onmessage = (event) => {
+//   const recievedData = JSON.parse(event.data);
+//   console.log("hi hello");
+
+//   updateMonacoEditor(recievedData);
+// };
