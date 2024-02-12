@@ -1,53 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Simple P2P example</title>
-    <!-- Yjs scripts
+
+<head>
+  <meta charset="utf-8" />
+  <title>OneInterview</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@100;200;300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      border: 0;
+      padding: 0;
+      top: 0;
+      font-family: 'Open Sans', sans-serif;
+    }
+  </style>
+  <!-- <i class="fas fa-star"></i> -->
+  <!-- Yjs scripts
     <script src="https://cdn.jsdelivr.net/npm/yjs@latest/dist/yjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/y-websocket@latest/dist/y-websocket.min.js"></script> -->
 
-    <!-- Monaco Editor scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
-    <script>
-      require.config({
-        paths: {
-          vs: "https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs",
-        },
-      });
-    </script>
-  </head>
+  <!-- Monaco Editor scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
+  <script>
+    require.config({
+      paths: {
+        vs: "https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs",
+      },
+    });
+  </script>
+</head>
 
-  <body>
-    <h1>Simple P2P Example</h1>
-    <hr />
-    <button onclick="start();">Start</button><br />
-    <b>Local Id: <span id="localId" /></b><br />
-    <input type="text" id="callId" placeholder="Enter remote peer id" />
-    <button id="callButton" onclick="call();" disabled>Call</button>
-    <button id="hangupButton" onclick="hangup();" disabled>Hang Up</button>
-    <button id="screenShareButton" onclick="shareScreen();" disabled>
+<body>
+  <div class="container">
+    <h1 class="title"><span style="color: rgb(81, 81, 255);">One</span>Interview</h1>
+    <!-- <hr /> -->
+
+    <div class="content">
+
+      <div class="left_container">
+
+        <div class="header_container">
+          <div class="header">Video Conferencing</div>
+          <div class="id_box">
+            <span class="id_name">Local Id</span>
+            <span class="id_value" id="localId" /></b>
+          </div>
+        </div>
+
+        <div class="input_container">
+
+          <div class="input_left">
+            <div class="top_box">
+              <div class="box_item" onclick="start();">
+                <i class="fa-solid fa-play" id="f_icon"></i> Start Video
+              </div>
+              <div class="box_item">
+                <i class="fa-solid fa-code" id="f_icon"></i>
+                Code Editor
+              </div>
+              <div class="box_item">
+                <i class="fa-solid fa-chalkboard" id="f_icon"></i>
+                White Board
+              </div>
+              <div class="box_item" id="screenShareButton" onclick="shareScreen();">
+                <i class="fa-brands fa-chromecast" id="f_icon"></i>
+                Screen Share
+              </div>
+            </div>
+          </div>
+
+          <div class="input_right">
+            <input class="id_input" type="text" id="callId" placeholder="Enter Peer Address" />
+            <button class="call_button" id="callButton" onclick="call();" disabled><i
+                class="fa-solid fa-phone"></i></button>
+          </div>
+
+        </div>
+
+        <div class="feature_container">
+          <div class="feature_left">
+            <div id="editor-container" style="height: 400px; width: 550px"></div>
+          </div>
+          <div class="feature_right">
+            <div class="feature_right_top">
+              <video id="localVideo" width="250" height="190" autoplay muted></video>
+            </div>
+            <div class="feature_right_bottom">
+              <video id="remoteVideo" width="250" height="190" autoplay></video>
+            </div>
+          </div>
+        </div>
+
+        <div class="buttons_container">
+
+          <button class="control_buttons" id="hangupButton" onclick="hangup();" disabled class="button_item"><i id="i1"
+              class="fa-regular fa-circle-xmark"></i></button>
+
+          <button class="control_buttons" id="screenShareButton" onclick="shareScreen();" disabled
+            class="button_item"><i id="i2" class="fa-brands fa-chromecast"></i></button>
+
+          <button class="control_buttons" id="stopScreenShareButton" onclick="stopShareScreen();" disabled
+            class="button_item"><i id="i3" class="fa-regular fa-rectangle-xmark"></i></button>
+
+          <button class="control_buttons" id="sendEditorDataButton" onclick="sendEditorData();" class="button_item"><i
+              id="i4" class="fa-solid fa-arrow-up-from-bracket"></i></button>
+
+        </div>
+
+      </div>
+
+      <div class="right_container">
+        <div class="message_top">
+          <div class="header" id="header_message">Messages</div>
+        </div>
+        <div class="message_bottom">
+          <div class="texts_container"></div>
+          <div class="type_container">
+            <input type="text" placeholder="Enter your message" id="chatMessage" class="message_input">
+            <div class="message_send" id="sendMessageButton" onclick="sendMessage();">
+              <i class="fa-solid fa-paper-plane"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- <button onclick="start();">Start</button><br /> -->
+    <!-- <b>Local Id: <br /> -->
+    <!-- <input type="text" id="callId" placeholder="Enter remote peer id" />
+    <button id="callButton" onclick="call();" disabled>Call</button> -->
+    <!-- <button id="hangupButton" onclick="hangup();" disabled><i class="fa-regular fa-circle-xmark"></i></button> -->
+    <!-- <button id="screenShareButton" onclick="shareScreen();" disabled>
       Share Screen
     </button>
     <button id="stopScreenShareButton" onclick="stopShareScreen();" disabled>
       Stop Share Screen
     </button>
-    <br />
-    <input type="text" id="chatMessage" placeholder="Enter message" />
-    <button id="sendMessageButton" onclick="sendMessage();">Send</button>
-    <input type="text" id="emojiMessage" placeholder="Enter Emoji" />
+    <br /> -->
+    <!-- <input type="text" id="chatMessage" placeholder="Enter message" />
+    <button id="sendMessageButton" onclick="sendMessage();">Send</button> -->
+    <!-- <input type="text" id="emojiMessage" placeholder="Enter Emoji" />
     <button id="sendEmojiButton" onclick="sendEmoji();">Send</button>
-    <hr />
+    <hr /> -->
 
-    <h3>Local Video</h3>
+    <!-- <h3>Local Video</h3>
     <video id="localVideo" width="640" height="480" autoplay muted></video>
 
     <h3>Remote Video</h3>
-    <video id="remoteVideo" width="640" height="480" autoplay></video>
-    <h3>Editor</h3>
-    <div id="editor-container" style="height: 500px; width: 500px"></div>
-    <button id="sendEditorDataButton" onclick="sendEditorData();">Send</button>
+    <video id="remoteVideo" width="640" height="480" autoplay></video> -->
+    <!-- <h3>Editor</h3>
+    <div id="editor-container" style="height: 500px; width: 500px"></div> -->
+    <!-- <button id="sendEditorDataButton" onclick="sendEditorData();">Send</button> -->
 
-    <script src="./main.js"></script>
-  </body>
+  </div>
+
+  <script src="./main.js"></script>
+</body>
+
 </html>
